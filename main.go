@@ -8,21 +8,18 @@ import (
 	"strconv"
 )
 
+
 func main() {
 	result := rs.Search()
 
 	for true {
 		rs.ViewResult(result)
+		// fmt.Println("| q = quit | <num> = show file <num> |")
+		fmt.Println("q = quit, 1 = show file #1, ...")
 		fmt.Println("Enter a key:")
 		input := bufio.NewScanner(os.Stdin)
 		input.Scan()
 		key := input.Text()
-		fmt.Println(key)
-		fmt.Printf("%T\n", key)
-		// if err != nil {
-		// 	fmt.Fprintln(os.Stderr, "Error getting key")
-		// 	os.Exit(1)
-		// }
 
 		switch key {
 		case "q":
@@ -33,14 +30,14 @@ func main() {
 		default:
 			// 	print file
 			i, err := strconv.Atoi(key)
-			fmt.Println("i:", i)
+			// fmt.Println("i:", i)
 			if err == nil {
 				// fmt.Println(i)
 				if i >= 1 && i <= len(result) {
-					fmt.Println(result[i-1])
+					// fmt.Println(result[i-1])
 					rs.FileConcat(result, i-1)
 				} else {
-					fmt.Println("not a valid index")
+					fmt.Println("not a valid file number")
 					// os.Exit(1)
 				}
 			}

@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+
 // add search words to list of arguments
 // get from command line or ask at runtime
 func args (cmdargs []string) []string {
@@ -26,6 +27,7 @@ func args (cmdargs []string) []string {
 		return cmdargs
 	}
 }
+
 
 func Search() []string {
 	cmdName := "recoll"
@@ -62,23 +64,20 @@ func Search() []string {
 	return result
 }
 
+
 func ViewResult(result []string)  {
 	for i, v := range result {
 		fmt.Println(i+1, v)
 	}
+	fmt.Println()
 }
 
-/*
-enter file number to view file or n for new search or q to quit
- */
-
-/* open file + print it out */
 
 func FileConcat(res []string, i int)  {
 
 	f := res[i]
 	f = strings.TrimPrefix(f, "file://")
-	fmt.Println("opening:", f)
+	fmt.Println("file:", f)
 	file, err := os.Open(f)
 
 	if err != nil {
@@ -90,7 +89,7 @@ func FileConcat(res []string, i int)  {
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
-		fmt.Println(scanner.Text()) // Println will add back the final '\n'
+		fmt.Println(scanner.Text())
 	}
-
+	fmt.Println()
 }
