@@ -8,10 +8,8 @@ import (
 )
 
 func Search() {
-	// docker build current directory
 	cmdName := "recoll"
 	cmdArgs := []string{"-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
-	// cmdArgs := []string{"build", "."}
 
 	fmt.Print("Enter search: ")
 	searchTerm := bufio.NewScanner(os.Stdin)
@@ -31,7 +29,6 @@ func Search() {
 	var result []string
 	go func() {
 		for scanner.Scan() {
-			// fmt.Printf("%s\n", scanner.Text())
 			result = append(result, scanner.Text())
 		}
 	}()
@@ -51,4 +48,3 @@ func Search() {
 		fmt.Println(i, v)
 	}
 }
-
