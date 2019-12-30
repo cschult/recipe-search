@@ -3,8 +3,10 @@ package rs
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 // add search words to list of arguments
@@ -25,7 +27,7 @@ func args (cmdargs []string) []string {
 	}
 }
 
-func Search() {
+func Search() []string {
 	cmdName := "recoll"
 	// needed arguments to call recoll for my recipe collection
 	cmdArgs := []string{"-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
@@ -57,8 +59,38 @@ func Search() {
 		fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
 		os.Exit(1)
 	}
-	// todo: make results viewable
+	return result
+}
+
+func ViewResult(result []string)  {
 	for i, v := range result {
-		fmt.Println(i, v)
+		fmt.Println(i+1, v)
 	}
+}
+
+/*
+enter file number to view file or n for new search or q to quit
+ */
+
+/* open file + print it out */
+
+func FileConcat(res []string, i int)  {
+
+	f := res[i]
+	f = strings.TrimPrefix(f, "file://")
+	fmt.Println("opening:", f)
+	file, err := os.Open(f)
+
+	if err != nil {
+		log.Fatalf("failed opening file: %s", err)
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text()) // Println will add back the final '\n'
+	}
+
 }
