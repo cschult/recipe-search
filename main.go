@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-func main() {
+func rs() {
 	// docker build current directory
 	cmdName := "recoll"
 	cmdArgs := []string{"-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
@@ -17,6 +17,7 @@ func main() {
 	searchTerm := bufio.NewScanner(os.Stdin)
 	searchTerm.Scan()
 	search := searchTerm.Text()
+	// fmt.Printf("%s\n", search)
 	cmdArgs = append(cmdArgs, search)
 
 	cmd := exec.Command(cmdName, cmdArgs...)
@@ -49,4 +50,8 @@ func main() {
 	for i, v := range result {
 		fmt.Println(i, v)
 	}
+}
+
+func main() {
+	rs()
 }
