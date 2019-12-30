@@ -27,9 +27,11 @@ func main() {
 	}
 
 	scanner := bufio.NewScanner(cmdReader)
+	var result []string
 	go func() {
 		for scanner.Scan() {
-			fmt.Printf("%s\n", scanner.Text())
+			// fmt.Printf("%s\n", scanner.Text())
+			result = append(result, scanner.Text())
 		}
 	}()
 
@@ -43,5 +45,8 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
 		os.Exit(1)
+	}
+	for i, v := range result {
+		fmt.Println(i, v)
 	}
 }
