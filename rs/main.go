@@ -3,7 +3,6 @@ package rs
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -81,7 +80,7 @@ func FileConcat(res []string, i int)  {
 	file, err := os.Open(f)
 
 	if err != nil {
-		log.Fatalf("failed opening file: %s", err)
+		fmt.Fprintln(os.Stderr, "failed opening file: %s\n", err)
 	}
 
 	defer file.Close()
