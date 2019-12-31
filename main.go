@@ -1,6 +1,7 @@
 package main
 
-// todo:
+// todo: show pdf files ('pdftotext -' or external viewer)
+// todo: add printing
 
 import (
 	"bufio"
@@ -16,8 +17,7 @@ func main() {
 	rs.ViewResult(result)
 
 	for true {
-		// fmt.Println("| q = quit | <num> = show file <num> |")
-		fmt.Println("q = quit, 1 = show file #1, ...")
+		fmt.Println("q = quit; n = new search; 1 = show file #1; 2 = ...")
 		fmt.Printf("Enter a key: ")
 		input := bufio.NewScanner(os.Stdin)
 		input.Scan()
@@ -26,17 +26,17 @@ func main() {
 		switch key {
 		case "q":
 			os.Exit(0)
+		case "n":
+			// 8
+			os.Args = []string{"recipe-search"}
+			result = rs.Search()
+			rs.ViewResult(result)
 		case "":
-			// fmt.Println("pressed ENTER")
 			fmt.Println("q = quit, 1 = show file #1, ...")
 		default:
-			// 	print file
 			i, err := strconv.Atoi(key)
-			// fmt.Println("i:", i)
 			if err == nil {
-				// fmt.Println(i)
 				if i >= 1 && i <= len(result) {
-					// fmt.Println(result[i-1])
 					rs.FileConcat(result, i-1)
 					fmt.Println("press ENTER to continue")
 					cont := bufio.NewScanner(os.Stdin)
@@ -45,7 +45,6 @@ func main() {
 
 				} else {
 					fmt.Println("not a valid file number")
-					// os.Exit(1)
 				}
 			}
 		}
