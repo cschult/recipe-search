@@ -27,8 +27,10 @@ func main() {
 		case "q":
 			os.Exit(0)
 		case "n":
-			// 8
-			os.Args = []string{"recipe-search"}
+			// empty list of command line args so that rs.args()
+			// asks user for new search term
+			myName := os.Args[0]
+			os.Args = []string{myName}
 			result = rs.Search()
 			rs.ViewResult(result)
 		case "":
