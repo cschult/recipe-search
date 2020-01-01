@@ -78,6 +78,7 @@ func Search() ([]string, []string) {
 
 
 func ViewResult(result []string)  {
+	fmt.Println()
 	for i, v := range result {
 		fmt.Println(i+1, v)
 	}
