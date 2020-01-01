@@ -5,7 +5,7 @@ package main
 
 import (
 	"bufio"
-	"devmem.de/srv/git/recipe-search/rs"
+	"devmem.de/srv/git/recipe-search/internal"
 	"fmt"
 	"os"
 	"strconv"
