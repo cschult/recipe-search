@@ -92,3 +92,12 @@ func FileConcat(res []string, i int)  {
 	}
 	fmt.Println()
 }
+
+func Print(res []string, i int) {
+	// 	prints recipe to printer
+	// - need file number to select file from slice of files
+	// check $PRINTER
+	// or list all available printers with lpstat -a
+	// ask user for printer selection
+	// print file
+}
