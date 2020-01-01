@@ -19,9 +19,10 @@ func main() {
 	for true {
 		fmt.Println("q = quit; n = new search; 1 = show file #1; 2 = ...")
 		fmt.Printf("Enter a key: ")
-		input := bufio.NewScanner(os.Stdin)
-		input.Scan()
-		key := input.Text()
+		// input := bufio.NewScanner(os.Stdin)
+		// input.Scan()
+		// key := input.Text()
+		key := rs.Input()
 
 		switch key {
 		case "q":

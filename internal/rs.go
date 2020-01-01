@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+func Input() string {
+	input := bufio.NewScanner(os.Stdin)
+	input.Scan()
+	inputText := input.Text()
+	return inputText
+}
 
 // add search words to list of arguments
 // get from command line or ask at runtime
@@ -15,12 +21,13 @@ func args (cmdargs []string) []string {
 	argsWithoutProg := os.Args[1:]
 	if len(argsWithoutProg) == 0 {
 		fmt.Print("Enter search: ")
-		searchTerm := bufio.NewScanner(os.Stdin)
-		searchTerm.Scan()
-		search := searchTerm.Text()
+		// searchTerm := bufio.NewScanner(os.Stdin)
+		// searchTerm.Scan()
+		// search := searchTerm.Text()
 		// fmt.Printf("%s\n", search)
-		cmdargs = append(cmdargs, search)
-		return cmdargs
+		search := Input()
+		cmdArgs = append(cmdArgs, search)
+		return cmdArgs
 	} else {
 		cmdargs = append(cmdargs, argsWithoutProg...)
 		return cmdargs
