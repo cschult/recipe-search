@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -52,7 +53,11 @@ func Search() []string {
 	var result []string
 	go func() {
 		for scanner.Scan() {
-			result = append(result, scanner.Text())
+			resultPathFile = append(resultPathFile, scanner.Text())
+			}
+			for _, f := range resultPathFile {
+				// resultFile = append(resultFile, strings.TrimPrefix(f, "file://"))
+				resultFile = append(resultFile, filepath.Base(f))
 		}
 	}()
 
