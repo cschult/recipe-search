@@ -36,7 +36,7 @@ func args(cmdArgs []string) []string {
 }
 
 
-func Search() []string {
+func Search() ([]string, []string) {
 	cmdName := "recoll"
 	// needed arguments to call recoll for my recipe collection
 	cmdArgs := []string{"-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
@@ -50,7 +50,8 @@ func Search() []string {
 	}
 
 	scanner := bufio.NewScanner(cmdReader)
-	var result []string
+	var resultPathFile []string
+	var resultFile []string
 	go func() {
 		for scanner.Scan() {
 			resultPathFile = append(resultPathFile, scanner.Text())
@@ -72,7 +73,7 @@ func Search() []string {
 		fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
 		os.Exit(1)
 	}
-	return result
+	return resultPathFile, resultFile
 }
 
 

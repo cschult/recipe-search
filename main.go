@@ -13,8 +13,8 @@ import (
 
 
 func main() {
-	result := rs.Search()
-	rs.ViewResult(result)
+	resultPathFile, resultFile := rs.Search()
+	rs.ViewResult(resultFile)
 
 	for true {
 		fmt.Println("q = quit; n = new search; 1 = show file #1; 2 = ...")
@@ -32,19 +32,25 @@ func main() {
 			// asks user for new search term
 			myName := os.Args[0]
 			os.Args = []string{myName}
-			result = rs.Search()
-			rs.ViewResult(result)
-		case "":
+			resultPathFile, resultFile = rs.Search()
+			rs.ViewResult(resultFile)
+		case "l":
+			rs.ViewResult(resultPathFile)
+		case "s":
+			rs.ViewResult(resultFile)
+		// case "p":	// print
+		// 	rs.Print(resultPathFile, 1)
+		case "":	// ENTER
 			fmt.Println("q = quit, 1 = show file #1, ...")
 		default:
 			i, err := strconv.Atoi(key)
 			if err == nil {
-				if i >= 1 && i <= len(result) {
-					rs.FileConcat(result, i-1)
+				if i >= 1 && i <= len(resultPathFile) {
+					rs.FileConcat(resultPathFile, i-1)
 					fmt.Println("press ENTER to continue")
 					cont := bufio.NewScanner(os.Stdin)
 					cont.Scan()
-					rs.ViewResult(result)
+					rs.ViewResult(resultFile)
 
 				} else {
 					fmt.Println("not a valid file number")
