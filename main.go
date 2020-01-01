@@ -17,7 +17,7 @@ func main() {
 	rs.ViewResult(resultFile)
 
 	for true {
-		fmt.Println("q = quit; n = new search; 1 = show file #1; 2 = ...")
+		fmt.Println("q: quit; n: search; l: long; s: short; 1 = show file #1; 2 = ...")
 		fmt.Printf("Enter a key: ")
 		// input := bufio.NewScanner(os.Stdin)
 		// input.Scan()
@@ -25,9 +25,9 @@ func main() {
 		key := rs.Input()
 
 		switch key {
-		case "q":
+		case "q":	// quit
 			os.Exit(0)
-		case "n":
+		case "n":	// new search
 			// empty list of command line args so that rs.args()
 			// asks user for new search term
 			myName := os.Args[0]
