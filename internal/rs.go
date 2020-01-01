@@ -22,10 +22,6 @@ func args(cmdArgs []string) []string {
 	argsWithoutProg := os.Args[1:]
 	if len(argsWithoutProg) == 0 {
 		fmt.Print("Enter search: ")
-		// searchTerm := bufio.NewScanner(os.Stdin)
-		// searchTerm.Scan()
-		// search := searchTerm.Text()
-		// fmt.Printf("%s\n", search)
 		search := Input()
 		cmdArgs = append(cmdArgs, search)
 		return cmdArgs
@@ -38,7 +34,7 @@ func args(cmdArgs []string) []string {
 
 func Search() ([]string, []string) {
 	cmdName := "recoll"
-	// needed arguments to call recoll for my recipe collection
+	// arguments to call recoll for my recipe collection
 	cmdArgs := []string{"-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
 
 	cmdArgs = args(cmdArgs)
