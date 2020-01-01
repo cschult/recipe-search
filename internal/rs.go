@@ -18,7 +18,7 @@ func Input() string {
 
 // add search words to list of arguments
 // get from command line or ask at runtime
-func args (cmdargs []string) []string {
+func args(cmdArgs []string) []string {
 	argsWithoutProg := os.Args[1:]
 	if len(argsWithoutProg) == 0 {
 		fmt.Print("Enter search: ")
@@ -30,8 +30,8 @@ func args (cmdargs []string) []string {
 		cmdArgs = append(cmdArgs, search)
 		return cmdArgs
 	} else {
-		cmdargs = append(cmdargs, argsWithoutProg...)
-		return cmdargs
+		cmdArgs = append(cmdArgs, argsWithoutProg...)
+		return cmdArgs
 	}
 }
 
