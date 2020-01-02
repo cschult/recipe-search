@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -120,6 +121,38 @@ func FileConcat(resultFile []string, resultPathFile []string, i int)  {
 	fmt.Printf("\npress ENTER to continue")
 	cont := bufio.NewScanner(os.Stdin)
 	cont.Scan()
+	ViewResult(resultFile)
+}
+
+// EditFile opens external editor to edit a recipe
+func EditFile(resultFile []string, resultPathFile []string)  {
+	var file string
+	fmt.Printf("enter number of file to edit: ")
+	key, err := strconv.Atoi(Input())
+	if err == nil {
+		file = resultPathFile[key]
+		file = strings.TrimPrefix(file, "file://")
+	} else {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	editorName := "nvim"
+	editorArgs := []string{file}
+
+	cmd := exec.Command(editorName, editorArgs...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err = cmd.Start()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error starting editor", err)
+	}
+
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error waiting for editor", err)
+	}
 	ViewResult(resultFile)
 }
 

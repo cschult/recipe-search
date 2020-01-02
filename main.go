@@ -1,7 +1,8 @@
 package main
 
+// todo: put config vars on top of rs.go
+// todo: config file
 // todo: show pdf files ('pdftotext -' or external viewer)
-// todo: edit recipe in external editor
 // todo: add printing
 
 import (
@@ -38,6 +39,8 @@ func main() {
 			rs.ViewResult(resultPathFile)
 		case "s":	// only filename
 			rs.ViewResult(resultFile)
+		case "e":
+			rs.EditFile(resultFile, resultPathFile)
 		// case "p":	// send file printer
 		// 	rs.Print(resultPathFile, 1)
 		case "":	// ENTER, print help line
