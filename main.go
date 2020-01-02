@@ -5,7 +5,7 @@ package main
 // todo: add printing
 
 import (
-	"devmem.de/srv/git/recipe-search/internal"
+	"devmem.de/srv/git/recipe-search/internal/rs"
 	"fmt"
 	"os"
 	"strconv"
@@ -17,7 +17,6 @@ import (
 func main() {
 	resultPathFile, resultFile := rs.Search()
 	rs.ViewResult(resultFile)
-
 	helpLine := "q: quit; n: search; l: long; s: short; 1 = show file #1; 2 = ..."
 
 	for true {
