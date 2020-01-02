@@ -128,7 +128,9 @@ func FileConcat(resultFile []string, resultPathFile []string, i int)  {
 func EditFile(resultFile []string, resultPathFile []string)  {
 	var file string
 	fmt.Printf("enter number of file to edit: ")
-	key, err := strconv.Atoi(Input())
+	k := Input()
+	i, err:= strconv.Atoi(k)
+	key := i - 1
 	if err == nil {
 		file = resultPathFile[key]
 		file = strings.TrimPrefix(file, "file://")
