@@ -5,7 +5,6 @@ package main
 // todo: add printing
 
 import (
-	"bufio"
 	"devmem.de/srv/git/recipe-search/internal"
 	"fmt"
 	"os"
@@ -13,12 +12,16 @@ import (
 )
 
 
+// main is the text user interface of this program.
+// It starts a loop for interacting with the user.
 func main() {
 	resultPathFile, resultFile := rs.Search()
 	rs.ViewResult(resultFile)
 
+	helpLine := "q: quit; n: search; l: long; s: short; 1 = show file #1; 2 = ..."
+
 	for true {
-		fmt.Println("q: quit; n: search; l: long; s: short; 1 = show file #1; 2 = ...")
+		fmt.Println(helpLine)
 		fmt.Printf("Enter a key: ")
 		key := rs.Input()
 
@@ -32,24 +35,19 @@ func main() {
 			os.Args = []string{myName}
 			resultPathFile, resultFile = rs.Search()
 			rs.ViewResult(resultFile)
-		case "l":
+		case "l":	// path and filename
 			rs.ViewResult(resultPathFile)
-		case "s":
+		case "s":	// only filename
 			rs.ViewResult(resultFile)
-		// case "p":	// print
+		// case "p":	// send file printer
 		// 	rs.Print(resultPathFile, 1)
-		case "":	// ENTER
-			fmt.Println("q = quit, 1 = show file #1, ...")
+		case "":	// ENTER, print help line
+			fmt.Println(helpLine)
 		default:
 			i, err := strconv.Atoi(key)
 			if err == nil {
 				if i >= 1 && i <= len(resultPathFile) {
-					rs.FileConcat(resultPathFile, i-1)
-					fmt.Println("press ENTER to continue")
-					cont := bufio.NewScanner(os.Stdin)
-					cont.Scan()
-					rs.ViewResult(resultFile)
-
+					rs.FileConcat(resultFile, resultPathFile, i-1)
 				} else {
 					fmt.Println("not a valid file number")
 				}
