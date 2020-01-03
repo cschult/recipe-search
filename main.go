@@ -1,12 +1,14 @@
 package main
 
-// todo: add help function (h)
+// todo: continue help function (h)
+// todo: sort matches
 // todo: remember state l or s
 // todo: put config vars on top of rs.go
 // todo: config file
 // todo: add printing
 
 import (
+	"devmem.de/srv/git/recipe-search/internal/h"
 	"devmem.de/srv/git/recipe-search/internal/rs"
 	"fmt"
 	"github.com/fatih/color"
@@ -20,7 +22,8 @@ import (
 func main() {
 	resultPathFile, resultFile := rs.Search()
 	rs.ViewResult(resultFile)
-	helpLine := color.CyanString("q: quit; n: search; l: long; s: short; e: edit; 1 = show file #1; 2 = ...")
+	helpLine := color.CyanString("h: help; q: quit; n: new search; l: long; s: short; e: edit; 1 = show file #1; 2" +
+		" = ...")
 
 	for true {
 		fmt.Println(helpLine)
@@ -28,6 +31,8 @@ func main() {
 		key := rs.Input()
 
 		switch key {
+		case "h":
+			h.Help()
 		case "q":	// quit
 			os.Exit(0)
 		case "n":	// new search
