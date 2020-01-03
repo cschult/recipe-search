@@ -3,6 +3,7 @@ package rs
 import (
 	"bufio"
 	"fmt"
+	"github.com/fatih/color"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -43,9 +44,10 @@ func args(cmdArgs []string) []string {
 // Slice 'resultPathFile' has the file names with path, resultFile only the
 // file names.
 func Search() ([]string, []string) {
+
 	cmdName := "recoll"
 	// arguments to call recoll for my recipe collection
-	cmdArgs := []string{"-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
+	cmdArgs := []string{"-t", "-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
 
 	// call args to get the command line args and create the Cmd struct 'cmd'
 	// and 'cmdReader' as a handle for stdout of external program.
@@ -53,7 +55,7 @@ func Search() ([]string, []string) {
 	cmd := exec.Command(cmdName, cmdArgs...)
 	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
+		prtErr("Error creating StdoutPipe for Cmd:", err)
 		os.Exit(1)
 	}
 
@@ -72,14 +74,14 @@ func Search() ([]string, []string) {
 	// start external program and error handling
 	err = cmd.Start()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error starting Cmd", err)
+		prtErr("Error starting Cmd:", err)
 		os.Exit(1)
 	}
 
 	// wait for external program to finish and error handling
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
+		prtErr("Error waiting for Cmd:", err)
 		os.Exit(1)
 	}
 
@@ -98,9 +100,9 @@ func ViewResult(result []string)  {
 }
 
 
-// FileConcat reads given file and prints it on screen line by line.
+// ConcatFile reads given file and prints it on screen line by line.
 // Then waiting for ENTER key to show list of files again.
-func FileConcat(resultFile []string, resultPathFile []string, i int)  {
+func ConcatFile(resultFile []string, resultPathFile []string, i int)  {
 
 	f := resultPathFile[i]
 	f = strings.TrimPrefix(f, "file://")
@@ -108,7 +110,7 @@ func FileConcat(resultFile []string, resultPathFile []string, i int)  {
 	file, err := os.Open(f)
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "failed opening file: %s\n", err)
+		prtErr("failed to open file:", err)
 	}
 
 	defer file.Close()
@@ -124,18 +126,34 @@ func FileConcat(resultFile []string, resultPathFile []string, i int)  {
 	ViewResult(resultFile)
 }
 
+
 // EditFile opens external editor to edit a recipe
 func EditFile(resultFile []string, resultPathFile []string)  {
+
 	var file string
 	fmt.Printf("enter number of file to edit: ")
 	k := Input()
+
+	if k == "" {
+		ViewResult(resultFile)
+		color.Yellow("pressed ENTER, returning\n\n")
+		return
+	}
+
 	i, err:= strconv.Atoi(k)
-	key := i - 1
 	if err == nil {
-		file = resultPathFile[key]
-		file = strings.TrimPrefix(file, "file://")
+		if i >= 1 && i <= len(resultPathFile) {
+			file = resultPathFile[i-1 ]
+			file = strings.TrimPrefix(file, "file://")
+		} else {
+			ViewResult(resultFile)
+			color.Yellow("no file with that number, returning\n\n")
+			return
+		}
 	} else {
-		fmt.Fprintln(os.Stderr, err)
+		ViewResult(resultFile)
+		color.Yellow("not a number, returning\n\n")
+		return
 	}
 
 	editorName := "nvim"
@@ -148,14 +166,26 @@ func EditFile(resultFile []string, resultPathFile []string)  {
 
 	err = cmd.Start()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error starting editor", err)
+		ViewResult(resultFile)
+		prtErr("Error starting editor:", err)
+		return
 	}
 
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error waiting for editor", err)
+		ViewResult(resultFile)
+		prtErr("Error waiting for editor:", err)
+		return
 	}
 	ViewResult(resultFile)
+}
+
+
+// prtErr print to stderr with color red,
+// surrounds string with newline
+func prtErr(s string, err error) {
+	red := color.New(color.FgHiRed).FprintfFunc()
+	red(os.Stderr, "%s %s\n\n", s, err)
 }
 
 

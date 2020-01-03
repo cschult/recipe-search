@@ -1,13 +1,15 @@
 package main
 
+// todo: add help function (h)
+// todo: remember state l or s
 // todo: put config vars on top of rs.go
 // todo: config file
-// todo: show pdf files ('pdftotext -' or external viewer)
 // todo: add printing
 
 import (
 	"devmem.de/srv/git/recipe-search/internal/rs"
 	"fmt"
+	"github.com/fatih/color"
 	"os"
 	"strconv"
 )
@@ -18,7 +20,7 @@ import (
 func main() {
 	resultPathFile, resultFile := rs.Search()
 	rs.ViewResult(resultFile)
-	helpLine := "q: quit; n: search; l: long; s: short; 1 = show file #1; 2 = ..."
+	helpLine := color.CyanString("q: quit; n: search; l: long; s: short; e: edit; 1 = show file #1; 2 = ...")
 
 	for true {
 		fmt.Println(helpLine)
@@ -44,15 +46,20 @@ func main() {
 		// case "p":	// send file printer
 		// 	rs.Print(resultPathFile, 1)
 		case "":	// ENTER, print help line
-			fmt.Println(helpLine)
+			rs.ViewResult(resultFile)
+			color.Yellow("enter a valid key or a file number\n\n")
 		default:
 			i, err := strconv.Atoi(key)
 			if err == nil {
 				if i >= 1 && i <= len(resultPathFile) {
-					rs.FileConcat(resultFile, resultPathFile, i-1)
+					rs.ConcatFile(resultFile, resultPathFile, i-1)
 				} else {
-					fmt.Println("not a valid file number")
+					rs.ViewResult(resultFile)
+					color.Yellow("not a valid file number\n\n")
 				}
+			} else {
+				rs.ViewResult(resultFile)
+				color.Yellow("invalid key\n\n")
 			}
 		}
 	}
