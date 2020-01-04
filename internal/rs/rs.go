@@ -3,10 +3,12 @@ package rs
 import (
 	"bufio"
 	"fmt"
+	"github.com/akutz/sortfold"
 	"github.com/fatih/color"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -84,6 +86,17 @@ func Search() ([]string, []string) {
 		prtErr("Error waiting for Cmd:", err)
 		os.Exit(1)
 	}
+
+	// sort list of files case insensitive
+	less1 := func(i, j int) bool {
+		return sortfold.CompareFold(resultPathFile[i], resultPathFile[j]) < 0
+	}
+	sort.SliceStable(resultPathFile, less1)
+
+	less2 := func(i, j int) bool {
+		return sortfold.CompareFold(resultFile[i], resultFile[j]) < 0
+	}
+	sort.SliceStable(resultFile, less2)
 
 	return resultPathFile, resultFile
 }

@@ -1,6 +1,7 @@
 package main
 
-// todo: continue help function (h)
+// todo: ensure that only txt files are concatenated
+// todo: was passiert, wenn Corinna eine Datei editiert?
 // todo: sort matches
 // todo: remember state l or s
 // todo: put config vars on top of rs.go
