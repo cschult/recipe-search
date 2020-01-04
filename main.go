@@ -22,8 +22,8 @@ import (
 func main() {
 	resultPathFile, resultFile := rs.Search()
 	rs.ViewResult(resultFile)
-	helpLine := color.CyanString("h: help; q: quit; n: new search; l: long; s: short; e: edit; 1 = show file #1; 2" +
-		" = ...")
+	helpLine := color.CyanString("h help | q quit | n new search | l long |" +
+		" s short | e edit | 1 = show file #1 | 2 = ...")
 
 	for true {
 		fmt.Println(helpLine)
