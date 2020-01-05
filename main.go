@@ -3,9 +3,7 @@ package main
 // todo: ensure that only txt files are concatenated
 // todo: was passiert, wenn Corinna eine Datei editiert?
 // todo: remember state l or s
-// todo: put config vars on top of rs.go
 // todo: config file
-// todo: add printing
 
 import (
 	"devmem.de/srv/git/recipe-search/internal/h"
@@ -23,7 +21,7 @@ func main() {
 	resultPathFile, resultFile := rs.Search()
 	rs.ViewResult(resultFile)
 	helpLine := color.CyanString("h help | q quit | n new search | l long |" +
-		" s short | e edit | 1 = show file #1 | 2 = ...")
+		" s short | p print | e edit | 1 = show file #1 | 2 = ...")
 
 	for true {
 		fmt.Println(helpLine)
@@ -48,8 +46,8 @@ func main() {
 			rs.ViewResult(resultFile)
 		case "e":
 			rs.EditFile(resultFile, resultPathFile)
-		// case "p":	// send file printer
-		// 	rs.Print(resultPathFile, 1)
+		case "p":	// send file to printer
+			rs.Print(resultFile, resultPathFile)
 		case "":	// ENTER, print help line
 			rs.ViewResult(resultFile)
 			color.Yellow("enter a valid key or a file number\n\n")

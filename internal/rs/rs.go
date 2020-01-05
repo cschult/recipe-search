@@ -5,12 +5,27 @@ import (
 	"fmt"
 	"github.com/akutz/sortfold"
 	"github.com/fatih/color"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+)
+
+
+// global config vars
+var (
+	searcher		 = "recoll"
+	editor           = "nvim"
+	txtConverter     = "paps"
+	lpr              = "lpr"
+	lprArgs          = "-P"
+	txtConverterArgs = "--font=Monospace 10"
+	printer          = "GraustufenNormalDuplex"
+	printDuplex      = "-o Duplex=DuplexNoTumble"
+	printcolor       = "-o BRMonoColor=Mono"
 )
 
 
@@ -47,15 +62,15 @@ func args(cmdArgs []string) []string {
 // file names.
 func Search() ([]string, []string) {
 
-	cmdName := "recoll"
+	// cmdName := "recoll"
 	// arguments to call recoll for my recipe collection
-	cmdArgs := []string{"-t", "-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
+	searcherArgs := []string{"-t", "-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
 
 	// call args to get the command line args and create the Cmd struct 'cmd'
-	// and 'cmdReader' as a handle for stdout of external program.
-	cmdArgs = args(cmdArgs)
-	cmd := exec.Command(cmdName, cmdArgs...)
-	cmdReader, err := cmd.StdoutPipe()
+	// and 'reader' as a handle for stdout of external program.
+	searcherArgs = args(searcherArgs)
+	cmd := exec.Command(searcher, searcherArgs...)
+	reader, err := cmd.StdoutPipe()
 	if err != nil {
 		prtErr("Error creating StdoutPipe for Cmd:", err)
 		os.Exit(1)
@@ -63,7 +78,7 @@ func Search() ([]string, []string) {
 
 	// read stdout line wise and return two slices with the file names
 	// (with and without path)
-	scanner := bufio.NewScanner(cmdReader)
+	scanner := bufio.NewScanner(reader)
 	var resultPathFile []string
 	var resultFile []string
 	go func() {
@@ -169,10 +184,9 @@ func EditFile(resultFile []string, resultPathFile []string)  {
 		return
 	}
 
-	editorName := "nvim"
 	editorArgs := []string{file}
 
-	cmd := exec.Command(editorName, editorArgs...)
+	cmd := exec.Command(editor, editorArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -202,11 +216,74 @@ func prtErr(s string, err error) {
 }
 
 
-func Print(res []string, i int) {
-	// 	prints recipe to printer
-	// - need file number to select file from slice of files
-	// check $PRINTER
-	// or list all available printers with lpstat -a
-	// ask user for printer selection
-	// print file
+// 	Print prints recipe to printer
+func Print(resultFile []string, resultPathFile []string) {
+
+	// fixme: same code here as in edit function
+	var file string
+	fmt.Printf("enter number of file to print: ")
+	k := Input()
+
+	if k == "" {
+		ViewResult(resultFile)
+		color.Yellow("pressed ENTER, returning\n\n")
+		return
+	}
+
+	i, err:= strconv.Atoi(k)
+	if err == nil {
+		if i >= 1 && i <= len(resultPathFile) {
+			file = resultPathFile[i-1 ]
+			file = strings.TrimPrefix(file, "file://")
+		} else {
+			ViewResult(resultFile)
+			color.Yellow("no file with that number, returning\n\n")
+			return
+		}
+	} else {
+		ViewResult(resultFile)
+		color.Yellow("not a number, returning\n\n")
+		return
+	}
+
+	firstArgs := []string{txtConverterArgs, file}
+	first := exec.Command(txtConverter, firstArgs...)
+	secondArgs := []string{lprArgs, printer, printDuplex, printcolor}
+	second := exec.Command(lpr, secondArgs...)
+
+	reader, writer := io.Pipe()
+	first.Stdout = writer
+	second.Stdin = reader
+
+    err = first.Start()
+	if err != nil {
+		ViewResult(resultFile)
+		prtErr("Error starting paps:", err)
+		return
+	}
+
+    err = second.Start()
+	if err != nil {
+		ViewResult(resultFile)
+		prtErr("Error starting lpr:", err)
+		return
+	}
+
+	err = first.Wait()
+	if err != nil {
+		ViewResult(resultFile)
+		prtErr("Error waiting for paps:", err)
+		return
+	}
+
+	writer.Close()
+    err = second.Wait()
+	if err != nil {
+		ViewResult(resultFile)
+		prtErr("Error waiting for lpr:", err)
+		return
+	}
+
+	fmt.Printf("printed file %s\n", file)
+	ViewResult(resultFile)
 }

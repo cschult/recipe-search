@@ -14,6 +14,7 @@ func Help()  {
 		"n: new search - enter new search term\n" +
 		"l: long - list files with URN\n" +
 		"s: short - list only filenames\n" +
+		"p: print - print file to default printer" +
 		"e: edit - hardcoded to nvim (fix this)\n" +
 		"1|2|3|...: enter number of file to view file\n" +
 		"\n" +
