@@ -128,6 +128,16 @@ func ViewResult(result []string)  {
 }
 
 
+// fileClose closes a file and exits if error occurs
+func fileClose(f *os.File)  {
+	err := f.Close()
+	if err != nil {
+        fmt.Fprintf(os.Stderr, "error: %v\n", err)
+        os.Exit(1)
+    }
+}
+
+
 // ConcatFile reads given file and prints it on screen line by line.
 // Then waiting for ENTER key to show list of files again.
 func ConcatFile(resultFile []string, resultPathFile []string, i int)  {
@@ -141,7 +151,7 @@ func ConcatFile(resultFile []string, resultPathFile []string, i int)  {
 		prtErr("failed to open file:", err)
 	}
 
-	defer file.Close()
+	defer fileClose(file)
 
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
