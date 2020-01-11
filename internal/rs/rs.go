@@ -2,6 +2,7 @@ package rs
 
 import (
 	"bufio"
+	"devmem.de/srv/git/recipe-search/config"
 	"fmt"
 	"github.com/akutz/sortfold"
 	"github.com/fatih/color"
@@ -14,20 +15,8 @@ import (
 	"strings"
 )
 
-
-// global config vars
-var (
-	searcher		 = "recoll"
-	editor           = "nvim"
-	txtConverter     = "paps"
-	lpr              = "lpr"
-	lprArgs          = "-P"
-	txtConverterArgs = "--font=Monospace 10"
-	printer          = "GraustufenNormalDuplex"
-	printDuplex      = "-o Duplex=DuplexNoTumble"
-	printcolor       = "-o BRMonoColor=Mono"
-)
-
+// get configuration settings
+var c = config.Conf()
 
 // Input collects user input from keyboard and returns it as string.
 func Input() string {
@@ -42,16 +31,16 @@ func Input() string {
 // It get's them from command line or asks the user,
 // if no command line args where given.
 // fixme: split in two funcs, so main.go/main must not clear the list of cmd line args when a new search is started with "n".
-func args(cmdArgs []string) []string {
-	argsWithoutProg := os.Args[1:]
-	if len(argsWithoutProg) == 0 {
+func args(searcherArgs []string) []string {
+	args := os.Args[1:]
+	if len(args) == 0 {
 		fmt.Print("\nEnter search: ")
 		search := Input()
-		cmdArgs = append(cmdArgs, search)
-		return cmdArgs
+		searcherArgs = append(searcherArgs, search)
+		return searcherArgs
 	} else {
-		cmdArgs = append(cmdArgs, argsWithoutProg...)
-		return cmdArgs
+		searcherArgs = append(searcherArgs, args...)
+		return searcherArgs
 	}
 }
 
@@ -62,14 +51,13 @@ func args(cmdArgs []string) []string {
 // file names.
 func Search() ([]string, []string) {
 
-	// cmdName := "recoll"
-	// arguments to call recoll for my recipe collection
-	searcherArgs := []string{"-t", "-c", "/home/schulle/.config/recoll", "-t", "-b", "dir:/home/schulle/ownCloud/rezepte"}
+	// debug
+	// fmt.Println("debug line 70:", c)
 
 	// call args to get the command line args and create the Cmd struct 'cmd'
 	// and 'reader' as a handle for stdout of external program.
-	searcherArgs = args(searcherArgs)
-	cmd := exec.Command(searcher, searcherArgs...)
+	searcherArgs := args(c.Args.SearcherArgs)
+	cmd := exec.Command(c.Programs.Searcher, searcherArgs...)
 	reader, err := cmd.StdoutPipe()
 	if err != nil {
 		prtErr("Error creating StdoutPipe for Cmd:", err)
@@ -91,6 +79,7 @@ func Search() ([]string, []string) {
 	// start external program and error handling
 	err = cmd.Start()
 	if err != nil {
+		fmt.Println(c.Programs.Searcher, searcherArgs)
 		prtErr("Error starting Cmd:", err)
 		os.Exit(1)
 	}
@@ -128,8 +117,8 @@ func ViewResult(result []string)  {
 }
 
 
-// fileClose closes a file and exits if error occurs
-func fileClose(f *os.File)  {
+// FileClose closes a file and exits if error occurs
+func FileClose(f *os.File)  {
 	err := f.Close()
 	if err != nil {
         fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -151,7 +140,7 @@ func ConcatFile(resultFile []string, resultPathFile []string, i int)  {
 		prtErr("failed to open file:", err)
 	}
 
-	defer fileClose(file)
+	defer FileClose(file)
 
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
@@ -196,7 +185,7 @@ func EditFile(resultFile []string, resultPathFile []string)  {
 
 	editorArgs := []string{file}
 
-	cmd := exec.Command(editor, editorArgs...)
+	cmd := exec.Command(c.Programs.Editor, editorArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -256,10 +245,11 @@ func Print(resultFile []string, resultPathFile []string) {
 		return
 	}
 
-	firstArgs := []string{txtConverterArgs, file}
-	first := exec.Command(txtConverter, firstArgs...)
-	secondArgs := []string{lprArgs, printer, printDuplex, printcolor}
-	second := exec.Command(lpr, secondArgs...)
+	// firstArgs := []string{txtConverterArgs, file}
+	firstArgs := []string{c.Args.TxtConvArgs, file}
+	first := exec.Command(c.Programs.TxtConverter, firstArgs...)
+	secondArgs := []string{c.Args.LprArgs, c.Args.Printer, c.Args.PrintDuplex, c.Args.ColorPrint}
+	second := exec.Command(c.Programs.PrintCmd, secondArgs...)
 
 	reader, writer := io.Pipe()
 	first.Stdout = writer

@@ -1,0 +1,23 @@
+programs:
+  # name of the search program, e.g 'recoll'
+  searcher: "recoll"
+  # which editor to use
+  editor: "nvim"
+  # ascii files have to be converted to ps before printing
+  txtconverter: "paps"
+  # program to submit files for printing
+  printcmd: "lpr"
+
+args:
+  # arguments for e.g. recoll
+  searcherargs: ["-t", "-c", "/home/schulle/.config/recoll", "-b", "dir:/home/schulle/ownCloud/rezepte"]
+  # args for printcmd (lpr)
+  lprargs: "-P"
+  # args for text converter (paps)
+  txtconvargs: "--font=Monospace 10"
+  # the printer used by lpr
+  printer: "GraustufenNormalDuplex"
+  # printer option for duplex printing
+  printduplex: "-o Duplex=DuplexNoTumble"
+  # printer option for color printing
+  colorprint: "-o BRMonoColor=Mono"

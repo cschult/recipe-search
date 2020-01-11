@@ -1,12 +1,5 @@
 package main
 
-// todo: message when search has no result: sorry and show new search dialog prompt, do not print helpline
-// todo: refactor: call all func from main with all needed args
-// todo: config file
-// todo: ensure that only txt files are concatenated
-// todo: was passiert, wenn Corinna eine Datei editiert?
-// todo: remember state l or s
-
 import (
 	"devmem.de/srv/git/recipe-search/internal/h"
 	"devmem.de/srv/git/recipe-search/internal/rs"
@@ -16,10 +9,16 @@ import (
 	"strconv"
 )
 
+// todo: message when search has no result: sorry and show new search dialog prompt, do not print helpline
+// todo: ensure that only txt files are concatenated
+// todo: was passiert, wenn Corinna eine Datei editiert?
+// todo: remember state l or s
+
 
 // main is the text user interface of this program.
 // It starts a loop for interacting with the user.
 func main() {
+
 	resultPathFile, resultFile := rs.Search()
 	rs.ViewResult(resultFile)
 	helpLine := color.CyanString("h help | q quit | n new search | l long |" +
