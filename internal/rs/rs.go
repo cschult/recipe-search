@@ -2,7 +2,6 @@ package rs
 
 import (
 	"bufio"
-	"devmem.de/srv/git/recipe-search/config"
 	"fmt"
 	"github.com/akutz/sortfold"
 	"github.com/fatih/color"
@@ -16,26 +15,26 @@ import (
 )
 
 // get configuration settings
-var c = config.Conf()
+// var c = config.Conf()
 
 
-// ===========================
-// M A I N   F U N C T I O N S
-// ===========================
+// =================
+// F U N C T I O N S
+// =================
 
 // Search calls external program 'recoll', a document indexer, with arguments
 // and search term and returns two slices with the list of matching files.
 // Slice 'resultPathFile' has the file names with path, resultFile only the
 // file names.
-func Search() ([]string, []string) {
+func Search(searcher string, searcherArgs []string) ([]string, []string) {
 
 	// debug
 	// fmt.Println("debug line 70:", c)
 
 	// call args to get the command line args and create the Cmd struct 'cmd'
 	// and 'reader' as a handle for stdout of external program.
-	searcherArgs := args(c.Args.SearcherArgs)
-	cmd := exec.Command(c.Programs.Searcher, searcherArgs...)
+	searcherArgs = args(searcherArgs)
+	cmd := exec.Command(searcher, searcherArgs...)
 	reader, err := cmd.StdoutPipe()
 	if err != nil {
 		prtErr("Error creating StdoutPipe for Cmd:", err)
@@ -57,7 +56,7 @@ func Search() ([]string, []string) {
 	// start external program and error handling
 	err = cmd.Start()
 	if err != nil {
-		fmt.Println(c.Programs.Searcher, searcherArgs)
+		fmt.Println(searcher, searcherArgs)
 		prtErr("Error starting Cmd:", err)
 		os.Exit(1)
 	}
@@ -104,7 +103,7 @@ func ConcatFile(resultFile []string, resultPathFile []string, i int)  {
 
 
 // EditFile opens external editor to edit a recipe
-func EditFile(resultFile []string, resultPathFile []string)  {
+func EditFile(editor string, resultFile []string, resultPathFile []string)  {
 
 	var file string
 	fmt.Printf("enter number of file to edit: ")
@@ -134,7 +133,7 @@ func EditFile(resultFile []string, resultPathFile []string)  {
 
 	editorArgs := []string{file}
 
-	cmd := exec.Command(c.Programs.Editor, editorArgs...)
+	cmd := exec.Command(editor, editorArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -156,8 +155,16 @@ func EditFile(resultFile []string, resultPathFile []string)  {
 }
 
 
-// 	Print prints recipe to printer
-func Print(resultFile []string, resultPathFile []string) {
+// 	Print sends recipe to printer
+func Print(cfg map[string]string, resultFile []string, resultPathFile []string) {
+
+	prntcmd := cfg["prntcmd"]
+	converter := cfg["converter"]
+	prntcmdArgs := cfg["prntcmdArgs"]
+	converterArgs := cfg["converterArgs"]
+	printer := cfg["printer"]
+	prntduplex := cfg["prntduplex"]
+	prntcolor := cfg["prntcolor"]
 
 	// fixme: same code here as in edit function
 	var file string
@@ -187,10 +194,10 @@ func Print(resultFile []string, resultPathFile []string) {
 	}
 
 	// firstArgs := []string{txtConverterArgs, file}
-	firstArgs := []string{c.Args.TxtConvArgs, file}
-	first := exec.Command(c.Programs.TxtConverter, firstArgs...)
-	secondArgs := []string{c.Args.LprArgs, c.Args.Printer, c.Args.PrintDuplex, c.Args.ColorPrint}
-	second := exec.Command(c.Programs.PrintCmd, secondArgs...)
+	firstArgs := []string{converterArgs, file}
+	first := exec.Command(converter, firstArgs...)
+	secondArgs := []string{prntcmdArgs, printer, prntduplex, prntcolor}
+	second := exec.Command(prntcmd, secondArgs...)
 
 	reader, writer := io.Pipe()
 	first.Stdout = writer
@@ -234,8 +241,7 @@ func Print(resultFile []string, resultPathFile []string) {
 // H E L P E R   F U N C T I O N S
 // ===============================
 
-// ViewResult print the matching files on screen, numbered
-// beginning with 1
+// ViewResult print the matching files on screen
 func ViewResult(result []string)  {
 	fmt.Println()
 	for i, v := range result {
