@@ -10,11 +10,11 @@ import (
 	"strconv"
 )
 
+// todo: func to find config file
 // todo: message when search has no result: sorry and show new search dialog prompt, do not print helpline
 // todo: ensure that only txt files are concatenated
 // todo: what happens if a write protected recipe is edited? how to catch editor errors
 // todo: remember state l or s
-// todo: func to find config file
 
 
 type Config struct {
@@ -66,14 +66,15 @@ func main() {
 	}
 
 	// put all configs for printing into a map
-	prntcfg := make(map[string]string)
-	prntcfg["prntcmd"] = 		cfg.Programs.PrintCmd
-	prntcfg["converter"] =		cfg.Programs.TxtConverter
-	prntcfg["prntcmdArgs"] =	cfg.Args.LprArgs
-	prntcfg["converterArgs"] =	cfg.Args.TxtConvArgs
-	prntcfg["printer"] =		cfg.Args.Printer
-	prntcfg["prntduplex"] =		cfg.Args.PrintDuplex
-	prntcfg["prntcolor"] =		cfg.Args.ColorPrint
+	prntcfg := map[string]string{
+		"prntcmd": cfg.Programs.PrintCmd,
+		"converter": cfg.Programs.TxtConverter,
+		"prntcmdArgs": cfg.Args.LprArgs,
+		"converterArgs": cfg.Args.TxtConvArgs,
+		"printer": cfg.Args.Printer,
+		"prntduplex": cfg.Args.PrintDuplex,
+		"prntcolor": cfg.Args.ColorPrint,
+	}
 	// E N D   C O N F I G U R A T I O N
 
 	resultPathFile, resultFile := rs.Search(cfg.Programs.Searcher, cfg.Args.SearcherArgs)
