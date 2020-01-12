@@ -14,10 +14,6 @@ import (
 	"strings"
 )
 
-// get configuration settings
-// var c = config.Conf()
-
-
 // =================
 // F U N C T I O N S
 // =================
@@ -27,9 +23,6 @@ import (
 // Slice 'resultPathFile' has the file names with path, resultFile only the
 // file names.
 func Search(searcher string, searcherArgs []string) ([]string, []string) {
-
-	// debug
-	// fmt.Println("debug line 70:", c)
 
 	// call args to get the command line args and create the Cmd struct 'cmd'
 	// and 'reader' as a handle for stdout of external program.
