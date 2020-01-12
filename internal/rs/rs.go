@@ -18,32 +18,10 @@ import (
 // get configuration settings
 var c = config.Conf()
 
-// Input collects user input from keyboard and returns it as string.
-func Input() string {
-	input := bufio.NewScanner(os.Stdin)
-	input.Scan()
-	inputText := input.Text()
-	return inputText
-}
 
-
-// args adds search words to list of arguments.
-// It get's them from command line or asks the user,
-// if no command line args where given.
-// fixme: split in two funcs, so main.go/main must not clear the list of cmd line args when a new search is started with "n".
-func args(searcherArgs []string) []string {
-	args := os.Args[1:]
-	if len(args) == 0 {
-		fmt.Print("\nEnter search: ")
-		search := Input()
-		searcherArgs = append(searcherArgs, search)
-		return searcherArgs
-	} else {
-		searcherArgs = append(searcherArgs, args...)
-		return searcherArgs
-	}
-}
-
+// ===========================
+// M A I N   F U N C T I O N S
+// ===========================
 
 // Search calls external program 'recoll', a document indexer, with arguments
 // and search term and returns two slices with the list of matching files.
@@ -95,35 +73,6 @@ func Search() ([]string, []string) {
 	mySort(resultFile)
 
 	return resultPathFile, resultFile
-}
-
-
-// mySort sorts slice of strings case insensitive
-func mySort (a []string) {
-	sort.SliceStable(a, func(i, j int) bool {
-		return sortfold.CompareFold(a[i], a[j]) < 0
-	})
-}
-
-
-// ViewResult print the matching files on screen, numbered
-// beginning with 1
-func ViewResult(result []string)  {
-	fmt.Println()
-	for i, v := range result {
-		fmt.Println(i+1, v)
-	}
-	fmt.Println()
-}
-
-
-// FileClose closes a file and exits if error occurs
-func FileClose(f *os.File)  {
-	err := f.Close()
-	if err != nil {
-        fmt.Fprintf(os.Stderr, "error: %v\n", err)
-        os.Exit(1)
-    }
 }
 
 
@@ -207,14 +156,6 @@ func EditFile(resultFile []string, resultPathFile []string)  {
 }
 
 
-// prtErr print to stderr with color red,
-// surrounds string with newline
-func prtErr(s string, err error) {
-	red := color.New(color.FgHiRed).FprintfFunc()
-	red(os.Stderr, "%s %s\n\n", s, err)
-}
-
-
 // 	Print prints recipe to printer
 func Print(resultFile []string, resultPathFile []string) {
 
@@ -255,14 +196,14 @@ func Print(resultFile []string, resultPathFile []string) {
 	first.Stdout = writer
 	second.Stdin = reader
 
-    err = first.Start()
+	err = first.Start()
 	if err != nil {
 		ViewResult(resultFile)
 		prtErr("Error starting paps:", err)
 		return
 	}
 
-    err = second.Start()
+	err = second.Start()
 	if err != nil {
 		ViewResult(resultFile)
 		prtErr("Error starting lpr:", err)
@@ -277,7 +218,7 @@ func Print(resultFile []string, resultPathFile []string) {
 	}
 
 	writer.Close()
-    err = second.Wait()
+	err = second.Wait()
 	if err != nil {
 		ViewResult(resultFile)
 		prtErr("Error waiting for lpr:", err)
@@ -286,4 +227,67 @@ func Print(resultFile []string, resultPathFile []string) {
 
 	fmt.Printf("printed file %s\n", file)
 	ViewResult(resultFile)
+}
+
+
+// ===============================
+// H E L P E R   F U N C T I O N S
+// ===============================
+
+// ViewResult print the matching files on screen, numbered
+// beginning with 1
+func ViewResult(result []string)  {
+	fmt.Println()
+	for i, v := range result {
+		fmt.Println(i+1, v)
+	}
+	fmt.Println()
+}
+
+// Input collects user input from keyboard and returns it as string.
+func Input() string {
+	in := bufio.NewScanner(os.Stdin)
+	in.Scan()
+	s := in.Text()
+	return s
+}
+
+// mySort sorts slice of strings case insensitive
+func mySort (a []string) {
+	sort.SliceStable(a, func(i, j int) bool {
+		return sortfold.CompareFold(a[i], a[j]) < 0
+	})
+}
+
+// FileClose closes a file and exits if error occurs
+func FileClose(f *os.File)  {
+	err := f.Close()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+// prtErr print to stderr with color red,
+// surrounds string with newline
+func prtErr(s string, err error) {
+	red := color.New(color.FgHiRed).FprintfFunc()
+	red(os.Stderr, "%s %s\n\n", s, err)
+}
+
+// args adds search words to list of arguments.
+// It get's them from command line or asks the user,
+// if no command line args where given.
+// fixme: split in two funcs, so main.go/main must not clear the list of cmd line args when a new search is started with "n".
+func args(searcherArgs []string) []string {
+	args := os.Args[1:]
+	if len(args) == 0 {
+		fmt.Print("\nEnter search: ")
+		search := Input()
+		searcherArgs = append(searcherArgs, search)
+		return searcherArgs
+	} else {
+		searcherArgs = append(searcherArgs, args...)
+		return searcherArgs
+	}
 }
