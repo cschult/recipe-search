@@ -10,11 +10,11 @@ import (
 	"strconv"
 )
 
+// todo: rs.EditFile() auch mit eigenen errors machen, wie rs.Print()
 // todo: func to find config file
 // todo: message when search has no result: sorry and show new search dialog prompt, do not print helpline
 // todo: ensure that only txt files are concatenated
 // todo: what happens if a write protected recipe is edited? how to catch editor errors
-// todo: remember state l or s
 
 
 type Config struct {
@@ -32,6 +32,9 @@ type Config struct {
 		PrintDuplex string `yaml:"printduplex"`
 		ColorPrint string `yaml:"colorprint"`
 	} `yaml:"args"`
+	Flags struct {
+		Uri bool
+	} `yaml:"flags"`
 }
 
 
@@ -75,10 +78,12 @@ func main() {
 		"prntduplex": cfg.Args.PrintDuplex,
 		"prntcolor": cfg.Args.ColorPrint,
 	}
-	// E N D   C O N F I G U R A T I O N
+	// flag indicating if files are listed as URI or filename only
+	// false means: as filename (default)
+	Uri := cfg.Flags.Uri
 
 	resultPathFile, resultFile := rs.Search(cfg.Programs.Searcher, cfg.Args.SearcherArgs)
-	rs.ViewResult(resultFile)
+	rs.ViewResult(resultPathFile, resultFile, Uri)
 	helpLine := color.CyanString("h help | q quit | n new search | l long |" +
 		" s short | p print | e edit | 1 = show file #1 | 2 = ...")
 
@@ -98,29 +103,41 @@ func main() {
 			myName := os.Args[0]
 			os.Args = []string{myName}
 			resultPathFile, resultFile = rs.Search(cfg.Programs.Searcher, cfg.Args.SearcherArgs)
-			rs.ViewResult(resultFile)
+			rs.ViewResult(resultPathFile, resultFile, Uri)
 		case "l":	// path and filename
-			rs.ViewResult(resultPathFile)
+			Uri = true
+			rs.ViewResult(resultPathFile, resultFile, Uri)
 		case "s":	// only filename
-			rs.ViewResult(resultFile)
+			Uri = false
+			rs.ViewResult(resultPathFile, resultFile, Uri)
 		case "e":
-			rs.EditFile(cfg.Programs.Editor, resultFile, resultPathFile)
+			rs.EditFile(cfg.Programs.Editor, resultPathFile, resultFile)
+			rs.ViewResult(resultPathFile, resultFile, Uri)
 		case "p":	// send file to printer
-			rs.Print(prntcfg, resultFile, resultPathFile)
+			err = rs.Print(prntcfg, resultPathFile, resultFile)
+			rs.ViewResult(resultPathFile, resultFile, Uri)
+			if err != nil {
+				rs.PrtErr("Oops!", err)
+			}
 		case "":	// ENTER, print help line
-			rs.ViewResult(resultFile)
+			rs.ViewResult(resultPathFile, resultFile, Uri)
 			color.Yellow("enter a valid key or a file number\n\n")
 		default:
 			i, err := strconv.Atoi(key)
 			if err == nil {
 				if i >= 1 && i <= len(resultPathFile) {
-					rs.ConcatFile(resultFile, resultPathFile, i-1)
+					err = rs.ConcatFile(resultPathFile, resultFile, i-1)
+					rs.ViewResult(resultPathFile, resultFile, Uri)
+					if err != nil {
+						// fmt.Fprintf(os.Stderr, "%s\t", err)
+						rs.PrtErr("Oops!", err)
+					}
 				} else {
-					rs.ViewResult(resultFile)
+					rs.ViewResult(resultPathFile, resultFile, Uri)
 					color.Yellow("not a valid file number\n\n")
 				}
 			} else {
-				rs.ViewResult(resultFile)
+				rs.ViewResult(resultPathFile, resultFile, Uri)
 				color.Yellow("invalid key\n\n")
 			}
 		}

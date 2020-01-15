@@ -2,6 +2,7 @@ package rs
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"github.com/akutz/sortfold"
 	"github.com/fatih/color"
@@ -30,7 +31,7 @@ func Search(searcher string, searcherArgs []string) ([]string, []string) {
 	cmd := exec.Command(searcher, searcherArgs...)
 	reader, err := cmd.StdoutPipe()
 	if err != nil {
-		prtErr("Error creating StdoutPipe for Cmd:", err)
+		PrtErr("Error creating StdoutPipe for Cmd:", err)
 		os.Exit(1)
 	}
 
@@ -50,14 +51,14 @@ func Search(searcher string, searcherArgs []string) ([]string, []string) {
 	err = cmd.Start()
 	if err != nil {
 		fmt.Println(searcher, searcherArgs)
-		prtErr("Error starting Cmd:", err)
+		PrtErr("Error starting Cmd:", err)
 		os.Exit(1)
 	}
 
 	// wait for external program to finish and error handling
 	err = cmd.Wait()
 	if err != nil {
-		prtErr("Error waiting for Cmd:", err)
+		PrtErr("Error waiting for Cmd:", err)
 		os.Exit(1)
 	}
 
@@ -70,7 +71,7 @@ func Search(searcher string, searcherArgs []string) ([]string, []string) {
 
 // ConcatFile reads given file and prints it on screen line by line.
 // Then waiting for ENTER key to show list of files again.
-func ConcatFile(resultFile []string, resultPathFile []string, i int)  {
+func ConcatFile(resultPathFile []string, resultFile []string, i int) error {
 
 	f := resultPathFile[i]
 	f = strings.TrimPrefix(f, "file://")
@@ -78,7 +79,8 @@ func ConcatFile(resultFile []string, resultPathFile []string, i int)  {
 	file, err := os.Open(f)
 
 	if err != nil {
-		prtErr("failed to open file:", err)
+		// PrtErr("failed to open file:", err)
+		return err
 	}
 
 	defer FileClose(file)
@@ -91,19 +93,18 @@ func ConcatFile(resultFile []string, resultPathFile []string, i int)  {
 	fmt.Printf("\npress ENTER to continue")
 	cont := bufio.NewScanner(os.Stdin)
 	cont.Scan()
-	ViewResult(resultFile)
+	return err
 }
 
 
 // EditFile opens external editor to edit a recipe
-func EditFile(editor string, resultFile []string, resultPathFile []string)  {
+func EditFile(editor string, resultPathFile []string, resultFile []string)  {
 
 	var file string
 	fmt.Printf("enter number of file to edit: ")
 	k := Input()
 
 	if k == "" {
-		ViewResult(resultFile)
 		color.Yellow("pressed ENTER, returning\n\n")
 		return
 	}
@@ -114,12 +115,10 @@ func EditFile(editor string, resultFile []string, resultPathFile []string)  {
 			file = resultPathFile[i-1 ]
 			file = strings.TrimPrefix(file, "file://")
 		} else {
-			ViewResult(resultFile)
 			color.Yellow("no file with that number, returning\n\n")
 			return
 		}
 	} else {
-		ViewResult(resultFile)
 		color.Yellow("not a number, returning\n\n")
 		return
 	}
@@ -133,23 +132,20 @@ func EditFile(editor string, resultFile []string, resultPathFile []string)  {
 
 	err = cmd.Start()
 	if err != nil {
-		ViewResult(resultFile)
-		prtErr("Error starting editor:", err)
+		PrtErr("Error starting editor:", err)
 		return
 	}
 
 	err = cmd.Wait()
 	if err != nil {
-		ViewResult(resultFile)
-		prtErr("Error waiting for editor:", err)
+		PrtErr("Error waiting for editor:", err)
 		return
 	}
-	ViewResult(resultFile)
 }
 
 
 // 	Print sends recipe to printer
-func Print(cfg map[string]string, resultFile []string, resultPathFile []string) {
+func Print(cfg map[string]string, resultPathFile []string, resultFile []string) error {
 
 	prntcmd := cfg["prntcmd"]
 	converter := cfg["converter"]
@@ -165,9 +161,8 @@ func Print(cfg map[string]string, resultFile []string, resultPathFile []string) 
 	k := Input()
 
 	if k == "" {
-		ViewResult(resultFile)
 		color.Yellow("pressed ENTER, returning\n\n")
-		return
+		return nil
 	}
 
 	i, err:= strconv.Atoi(k)
@@ -176,14 +171,12 @@ func Print(cfg map[string]string, resultFile []string, resultPathFile []string) 
 			file = resultPathFile[i-1 ]
 			file = strings.TrimPrefix(file, "file://")
 		} else {
-			ViewResult(resultFile)
-			color.Yellow("no file with that number, returning\n\n")
-			return
+			// color.Yellow("no file with that number, returning\n\n")
+			return errors.New("no file with that number, returning")
 		}
 	} else {
-		ViewResult(resultFile)
 		color.Yellow("not a number, returning\n\n")
-		return
+		return nil
 	}
 
 	// firstArgs := []string{txtConverterArgs, file}
@@ -198,35 +191,31 @@ func Print(cfg map[string]string, resultFile []string, resultPathFile []string) 
 
 	err = first.Start()
 	if err != nil {
-		ViewResult(resultFile)
-		prtErr("Error starting paps:", err)
-		return
+		// PrtErr("Error starting paps:", err)
+		return errors.New("error starting paps")
 	}
 
 	err = second.Start()
 	if err != nil {
-		ViewResult(resultFile)
-		prtErr("Error starting lpr:", err)
-		return
+		// PrtErr( "Error starting lpr:", err)
+		return errors.New("error starting lpr")
 	}
 
 	err = first.Wait()
 	if err != nil {
-		ViewResult(resultFile)
-		prtErr("Error waiting for paps:", err)
-		return
+		// PrtErr("Error waiting for paps:", err)
+		return errors.New("error waiting for paps")
 	}
 
 	writer.Close()
 	err = second.Wait()
 	if err != nil {
-		ViewResult(resultFile)
-		prtErr("Error waiting for lpr:", err)
-		return
+		// PrtErr("Error waiting for lpr:", err)
+		return errors.New("error waiting for lpr")
 	}
 
 	fmt.Printf("printed file %s\n", file)
-	ViewResult(resultFile)
+	return nil
 }
 
 
@@ -235,10 +224,16 @@ func Print(cfg map[string]string, resultFile []string, resultPathFile []string) 
 // ===============================
 
 // ViewResult print the matching files on screen
-func ViewResult(result []string)  {
+func ViewResult(resultpath []string, result []string, l bool)  {
 	fmt.Println()
-	for i, v := range result {
-		fmt.Println(i+1, v)
+	if l == true {
+		for i, v := range resultpath {
+			fmt.Println(i+1, v)
+		}
+	} else {
+		for i, v := range result {
+			fmt.Println(i+1, v)
+		}
 	}
 	fmt.Println()
 }
@@ -267,9 +262,9 @@ func FileClose(f *os.File)  {
 	}
 }
 
-// prtErr print to stderr with color red,
+// PrtErr print to stderr with color red,
 // surrounds string with newline
-func prtErr(s string, err error) {
+func PrtErr(s string, err error) {
 	red := color.New(color.FgHiRed).FprintfFunc()
 	red(os.Stderr, "%s %s\n\n", s, err)
 }

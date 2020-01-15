@@ -21,3 +21,8 @@ args:
   printduplex: "-o Duplex=DuplexNoTumble"
   # printer option for color printing
   colorprint: "-o BRMonoColor=Mono"
+
+flags:
+  # flag indicating if files are listed as URI or filename only
+  # true means: with path; default: false
+  uri: false
