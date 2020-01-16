@@ -114,7 +114,7 @@ func main() {
 			rs.EditFile(cfg.Programs.Editor, resultPathFile, resultFile)
 			rs.ViewResult(resultPathFile, resultFile, Uri)
 		case "p":	// send file to printer
-			err = rs.Print(prntcfg, resultPathFile, resultFile)
+			err = rs.Print(prntcfg, resultPathFile)
 			rs.ViewResult(resultPathFile, resultFile, Uri)
 			if err != nil {
 				rs.PrtErr("Oops!", err)

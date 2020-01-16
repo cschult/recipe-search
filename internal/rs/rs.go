@@ -68,7 +68,6 @@ func Search(searcher string, searcherArgs []string) ([]string, []string) {
 	return resultPathFile, resultFile
 }
 
-
 // ConcatFile reads given file and prints it on screen line by line.
 // Then waiting for ENTER key to show list of files again.
 func ConcatFile(resultPathFile []string, resultFile []string, i int) error {
@@ -96,9 +95,8 @@ func ConcatFile(resultPathFile []string, resultFile []string, i int) error {
 	return err
 }
 
-
 // EditFile opens external editor to edit a recipe
-func EditFile(editor string, resultPathFile []string, resultFile []string)  {
+func EditFile(editor string, resultPathFile []string, resultFile []string) {
 
 	var file string
 	fmt.Printf("enter number of file to edit: ")
@@ -109,7 +107,7 @@ func EditFile(editor string, resultPathFile []string, resultFile []string)  {
 		return
 	}
 
-	i, err:= strconv.Atoi(k)
+	i, err := strconv.Atoi(k)
 	if err == nil {
 		if i >= 1 && i <= len(resultPathFile) {
 			file = resultPathFile[i-1 ]
@@ -143,9 +141,8 @@ func EditFile(editor string, resultPathFile []string, resultFile []string)  {
 	}
 }
 
-
 // 	Print sends recipe to printer
-func Print(cfg map[string]string, resultPathFile []string, resultFile []string) error {
+func Print(cfg map[string]string, resultPathFile []string) error {
 
 	prntcmd := cfg["prntcmd"]
 	converter := cfg["converter"]
@@ -165,7 +162,7 @@ func Print(cfg map[string]string, resultPathFile []string, resultFile []string) 
 		return nil
 	}
 
-	i, err:= strconv.Atoi(k)
+	i, err := strconv.Atoi(k)
 	if err == nil {
 		if i >= 1 && i <= len(resultPathFile) {
 			file = resultPathFile[i-1 ]
@@ -178,6 +175,15 @@ func Print(cfg map[string]string, resultPathFile []string, resultFile []string) 
 		color.Yellow("not a number, returning\n\n")
 		return nil
 	}
+
+	// test if file exists and is readable
+	var f *os.File
+	f, err = os.Open(file)
+	if err != nil {
+		// PrtErr("failed to open file:", err)
+		return err
+	}
+	FileClose(f)
 
 	// firstArgs := []string{txtConverterArgs, file}
 	firstArgs := []string{converterArgs, file}
@@ -218,13 +224,12 @@ func Print(cfg map[string]string, resultPathFile []string, resultFile []string) 
 	return nil
 }
 
-
 // ===============================
 // H E L P E R   F U N C T I O N S
 // ===============================
 
 // ViewResult print the matching files on screen
-func ViewResult(resultpath []string, result []string, l bool)  {
+func ViewResult(resultpath []string, result []string, l bool) {
 	fmt.Println()
 	if l == true {
 		for i, v := range resultpath {
@@ -247,14 +252,14 @@ func Input() string {
 }
 
 // mySort sorts slice of strings case insensitive
-func mySort (a []string) {
+func mySort(a []string) {
 	sort.SliceStable(a, func(i, j int) bool {
 		return sortfold.CompareFold(a[i], a[j]) < 0
 	})
 }
 
 // FileClose closes a file and exits if error occurs
-func FileClose(f *os.File)  {
+func FileClose(f *os.File) {
 	err := f.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
