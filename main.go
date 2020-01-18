@@ -10,7 +10,6 @@ import (
 	"strconv"
 )
 
-// todo: rs.EditFile() auch mit eigenen errors machen, wie rs.Print()
 // todo: func to find config file
 // todo: message when search has no result: sorry and show new search dialog prompt, do not print helpline
 // todo: ensure that only txt files are concatenated
