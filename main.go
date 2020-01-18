@@ -16,37 +16,34 @@ import (
 // todo: ensure that only txt files are concatenated
 // todo: what happens if a write protected recipe is edited? how to catch editor errors
 
-
 type Config struct {
 	Programs struct {
-		Searcher string `yaml:"searcher"`
-		Editor string `yaml:"editor"`
+		Searcher     string `yaml:"searcher"`
+		Editor       string `yaml:"editor"`
 		TxtConverter string `yaml:"txtconverter"`
-		PrintCmd string `yaml:"printcmd"`
+		PrintCmd     string `yaml:"printcmd"`
 	} `yaml:"programs"`
 	Args struct {
 		SearcherArgs []string `yaml:"searcherargs"`
-		LprArgs string `yaml:"lprargs"`
-		TxtConvArgs string `yaml:"txtconvargs"`
-		Printer string `yaml:"printer"`
-		PrintDuplex string `yaml:"printduplex"`
-		ColorPrint string `yaml:"colorprint"`
+		LprArgs      string   `yaml:"lprargs"`
+		TxtConvArgs  string   `yaml:"txtconvargs"`
+		Printer      string   `yaml:"printer"`
+		PrintDuplex  string   `yaml:"printduplex"`
+		ColorPrint   string   `yaml:"colorprint"`
 	} `yaml:"args"`
 	Flags struct {
 		Uri bool
 	} `yaml:"flags"`
 }
 
-
 // FileClose closes a file and exits if error occurs
-func fileClose(f *os.File)  {
+func fileClose(f *os.File) {
 	err := f.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
-
 
 // main is the text user interface of this program.
 // It starts a loop for interacting with the user.
@@ -70,13 +67,13 @@ func main() {
 
 	// put all configs for printing into a map
 	prntcfg := map[string]string{
-		"prntcmd": cfg.Programs.PrintCmd,
-		"converter": cfg.Programs.TxtConverter,
-		"prntcmdArgs": cfg.Args.LprArgs,
+		"prntcmd":       cfg.Programs.PrintCmd,
+		"converter":     cfg.Programs.TxtConverter,
+		"prntcmdArgs":   cfg.Args.LprArgs,
 		"converterArgs": cfg.Args.TxtConvArgs,
-		"printer": cfg.Args.Printer,
-		"prntduplex": cfg.Args.PrintDuplex,
-		"prntcolor": cfg.Args.ColorPrint,
+		"printer":       cfg.Args.Printer,
+		"prntduplex":    cfg.Args.PrintDuplex,
+		"prntcolor":     cfg.Args.ColorPrint,
 	}
 	// flag indicating if files are listed as URI or filename only
 	// false means: as filename (default)
@@ -95,19 +92,19 @@ func main() {
 		switch key {
 		case "h":
 			h.Help()
-		case "q":	// quit
+		case "q": // quit
 			os.Exit(0)
-		case "n":	// new search
+		case "n": // new search
 			// clear the list of command line args so that rs.args()
 			// asks user for new search term
 			myName := os.Args[0]
 			os.Args = []string{myName}
 			resultPathFile, resultFile = rs.Search(cfg.Programs.Searcher, cfg.Args.SearcherArgs)
 			rs.ViewResult(resultPathFile, resultFile, Uri)
-		case "l":	// path and filename
+		case "l": // path and filename
 			Uri = true
 			rs.ViewResult(resultPathFile, resultFile, Uri)
-		case "s":	// only filename
+		case "s": // only filename
 			Uri = false
 			rs.ViewResult(resultPathFile, resultFile, Uri)
 		case "e":
@@ -116,13 +113,13 @@ func main() {
 			if err != nil {
 				rs.PrtErr("Oops!", err)
 			}
-		case "p":	// send file to printer
+		case "p": // send file to printer
 			err = rs.Print(prntcfg, resultPathFile)
 			rs.ViewResult(resultPathFile, resultFile, Uri)
 			if err != nil {
 				rs.PrtErr("Oops!", err)
 			}
-		case "":	// ENTER, print help line
+		case "": // ENTER, print help line
 			rs.ViewResult(resultPathFile, resultFile, Uri)
 			color.Yellow("enter a valid key or a file number\n\n")
 		default:
