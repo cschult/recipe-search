@@ -15,6 +15,7 @@ import (
 	"strings"
 )
 
+
 // =================
 // F U N C T I O N S
 // =================
@@ -68,6 +69,7 @@ func Search(searcher string, searcherArgs []string) ([]string, []string) {
 	return resultPathFile, resultFile
 }
 
+
 // ConcatFile reads given file and prints it on screen line by line.
 // Then waiting for ENTER key to show list of files again.
 func ConcatFile(resultPathFile []string, resultFile []string, i int) error {
@@ -94,6 +96,7 @@ func ConcatFile(resultPathFile []string, resultFile []string, i int) error {
 	cont.Scan()
 	return err
 }
+
 
 // EditFile opens external editor to edit a recipe
 func EditFile(editor string, resultPathFile []string) error {
@@ -142,6 +145,7 @@ func EditFile(editor string, resultPathFile []string) error {
 	return nil
 }
 
+
 // 	Print sends recipe to printer
 func Print(cfg map[string]string, resultPathFile []string) error {
 
@@ -169,8 +173,7 @@ func Print(cfg map[string]string, resultPathFile []string) error {
 			file = resultPathFile[i-1 ]
 			file = strings.TrimPrefix(file, "file://")
 		} else {
-			// color.Yellow("no file with that number, returning\n\n")
-			return errors.New("no file with that number, returning")
+			color.Yellow("no file with that number, returning\n\n")
 		}
 	} else {
 		color.Yellow("not a number, returning\n\n")
@@ -181,7 +184,6 @@ func Print(cfg map[string]string, resultPathFile []string) error {
 	var f *os.File
 	f, err = os.Open(file)
 	if err != nil {
-		// PrtErr("failed to open file:", err)
 		return err
 	}
 	FileClose(f)
@@ -198,32 +200,32 @@ func Print(cfg map[string]string, resultPathFile []string) error {
 
 	err = first.Start()
 	if err != nil {
-		// PrtErr("Error starting paps:", err)
-		return errors.New("error starting paps")
+		PrtErr("Error starting paps:", err)
 	}
 
 	err = second.Start()
 	if err != nil {
-		// PrtErr( "Error starting lpr:", err)
-		return errors.New("error starting lpr")
+		PrtErr( "Error starting lpr:", err)
 	}
 
 	err = first.Wait()
 	if err != nil {
-		// PrtErr("Error waiting for paps:", err)
-		return errors.New("error waiting for paps")
+		PrtErr("Error waiting for paps:", err)
 	}
 
-	writer.Close()
+	err = writer.Close()
+	if err != nil {
+		PrtErr("Error closing writer", err)
+	}
 	err = second.Wait()
 	if err != nil {
-		// PrtErr("Error waiting for lpr:", err)
-		return errors.New("error waiting for lpr")
+		PrtErr("Error waiting for lpr:", err)
 	}
 
 	fmt.Printf("printed file %s\n", file)
 	return nil
 }
+
 
 // ===============================
 // H E L P E R   F U N C T I O N S
@@ -244,6 +246,7 @@ func ViewResult(resultpath []string, result []string, l bool) {
 	fmt.Println()
 }
 
+
 // Input collects user input from keyboard and returns it as string.
 func Input() string {
 	in := bufio.NewScanner(os.Stdin)
@@ -252,12 +255,14 @@ func Input() string {
 	return s
 }
 
+
 // mySort sorts slice of strings case insensitive
 func mySort(a []string) {
 	sort.SliceStable(a, func(i, j int) bool {
 		return sortfold.CompareFold(a[i], a[j]) < 0
 	})
 }
+
 
 // FileClose closes a file and exits if error occurs
 func FileClose(f *os.File) {
@@ -268,12 +273,14 @@ func FileClose(f *os.File) {
 	}
 }
 
+
 // PrtErr print to stderr with color red,
 // surrounds string with newline
 func PrtErr(s string, err error) {
 	red := color.New(color.FgHiRed).FprintfFunc()
 	red(os.Stderr, "%s %s\n\n", s, err)
 }
+
 
 // args adds search words to list of arguments.
 // It get's them from command line or asks the user,
