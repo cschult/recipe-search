@@ -111,8 +111,11 @@ func main() {
 			Uri = false
 			rs.ViewResult(resultPathFile, resultFile, Uri)
 		case "e":
-			rs.EditFile(cfg.Programs.Editor, resultPathFile, resultFile)
+			err = rs.EditFile(cfg.Programs.Editor, resultPathFile)
 			rs.ViewResult(resultPathFile, resultFile, Uri)
+			if err != nil {
+				rs.PrtErr("Oops!", err)
+			}
 		case "p":	// send file to printer
 			err = rs.Print(prntcfg, resultPathFile)
 			rs.ViewResult(resultPathFile, resultFile, Uri)

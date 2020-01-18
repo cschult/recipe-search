@@ -96,7 +96,7 @@ func ConcatFile(resultPathFile []string, resultFile []string, i int) error {
 }
 
 // EditFile opens external editor to edit a recipe
-func EditFile(editor string, resultPathFile []string, resultFile []string) {
+func EditFile(editor string, resultPathFile []string) error {
 
 	var file string
 	fmt.Printf("enter number of file to edit: ")
@@ -104,7 +104,7 @@ func EditFile(editor string, resultPathFile []string, resultFile []string) {
 
 	if k == "" {
 		color.Yellow("pressed ENTER, returning\n\n")
-		return
+		return nil
 	}
 
 	i, err := strconv.Atoi(k)
@@ -114,11 +114,11 @@ func EditFile(editor string, resultPathFile []string, resultFile []string) {
 			file = strings.TrimPrefix(file, "file://")
 		} else {
 			color.Yellow("no file with that number, returning\n\n")
-			return
+			return nil
 		}
 	} else {
 		color.Yellow("not a number, returning\n\n")
-		return
+		return nil
 	}
 
 	editorArgs := []string{file}
@@ -130,15 +130,16 @@ func EditFile(editor string, resultPathFile []string, resultFile []string) {
 
 	err = cmd.Start()
 	if err != nil {
-		PrtErr("Error starting editor:", err)
-		return
+		// PrtErr("Error starting editor:", err)
+		return errors.New("error starting editor")
 	}
 
 	err = cmd.Wait()
 	if err != nil {
-		PrtErr("Error waiting for editor:", err)
-		return
+		// PrtErr("Error waiting for editor:", err)
+		return errors.New("error waiting for editor")
 	}
+	return nil
 }
 
 // 	Print sends recipe to printer
