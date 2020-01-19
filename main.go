@@ -3,14 +3,17 @@ package main
 import (
 	"devmem.de/srv/git/recipe-search/internal/h"
 	"devmem.de/srv/git/recipe-search/internal/rs"
+	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"gopkg.in/yaml.v2"
 	"os"
+	"os/exec"
 	"strconv"
 )
 
 // todo: func to find config file
+// todo: set editor via config (done) OR via environment variable
 // todo: message when search has no result: sorry and show new search dialog prompt, do not print helpline
 // todo: ensure that only txt files are concatenated
 // todo: what happens if a write protected recipe is edited? how to catch editor errors
@@ -44,12 +47,48 @@ func fileClose(f *os.File) {
 	}
 }
 
+// configFile looks for a config file and returns it
+func configFile() string {
+	// $HOME/.recipe-search.yml or $HOME/.config/recipe-search/config.yml
+	// or internal defaults
+	f := "config.yml"
+	return f
+}
+
+// printer set in config: error when printing
+// if not in cfg: setPrinter (read env PRINTER)
+//   if PRINTER not set: disable printing
+//   if PRINTER is set, test if ok, else disable printing
+func setPrinter() (string, error) {
+	printer, ok := os.LookupEnv("PRINTER")
+	if !ok {
+		// $PRINTER is not set
+		err := errors.New("environment variable PRINTER not set")
+		return "error", err
+	} else {
+		// check if $PRINTER is a valid printer
+		cmd := exec.Command("lpq", "-P", printer)
+		err := cmd.Start()
+		if err != nil {
+			// debug: rs.PrtErr("error starting lpq", err)
+			return "error starting lpq", err
+		}
+		err = cmd.Wait()
+		if err != nil {
+			// debug: rs.PrtErr("error waiting lpq", err)
+			return "error waiting lpq", err
+		}
+	}
+	return printer, nil
+}
+
 // main is the text user interface of this program.
 // It starts a loop for interacting with the user.
 func main() {
 	// C O N F I G U R A T I O N
+	cf := configFile()
 	var cfg Config
-	f, err := os.Open("config.yml")
+	f, err := os.Open(cf)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error opening file: %v\n", err)
 		os.Exit(1)
@@ -63,6 +102,21 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	// look for printer with $PRINTER, then with lpstat -d if not in config.yml
+	if cfg.Args.Printer == "" {
+		s, err := setPrinter()
+		if err != nil {
+			// color.Yellow("no printer, printing disabled")
+			cfg.Args.Printer = ""
+		} else {
+			cfg.Args.Printer = s
+		}
+	}
+	// todo: check if the printer set in config file is a valid printer
+
+	// debug
+	// fmt.Println("PRINTER:", cfg.Args.Printer)
 
 	// put all configs for printing into a map
 	prntcfg := map[string]string{
@@ -92,6 +146,7 @@ func main() {
 		case "h":
 			h.Help()
 		case "q": // quit
+			fmt.Println("\ngood bye")
 			os.Exit(0)
 		case "n": // new search
 			// clear the list of command line args so that rs.args()
@@ -113,10 +168,15 @@ func main() {
 				rs.PrtErr("Oops!", err)
 			}
 		case "p": // send file to printer
-			err = rs.Print(prntcfg, resultPathFile)
-			rs.ViewResult(resultPathFile, resultFile, Uri)
-			if err != nil {
-				rs.PrtErr("Oops!", err)
+			if cfg.Args.Printer != "" {
+				err = rs.Print(prntcfg, resultPathFile)
+				rs.ViewResult(resultPathFile, resultFile, Uri)
+				if err != nil {
+					rs.PrtErr("Oops!", err)
+				}
+			} else {
+				// no printer configured and no system default printer
+				color.Yellow("printing disabled, found no printer")
 			}
 		case "": // ENTER, print help line
 			rs.ViewResult(resultPathFile, resultFile, Uri)
