@@ -170,6 +170,7 @@ func Print(cfg map[string]string, resultPathFile []string) error {
 			file = strings.TrimPrefix(file, "file://")
 		} else {
 			color.Yellow("no file with that number, returning\n\n")
+			return nil
 		}
 	} else {
 		color.Yellow("not a number, returning\n\n")
