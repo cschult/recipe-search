@@ -1,15 +1,16 @@
 package main
 
 import (
-	"devmem.de/srv/git/recipe-search/internal/h"
-	"devmem.de/srv/git/recipe-search/internal/rs"
 	"errors"
 	"fmt"
-	"github.com/fatih/color"
-	"gopkg.in/yaml.v2"
 	"os"
 	"os/exec"
 	"strconv"
+
+	"devmem.de/srv/git/recipe-search/internal/h"
+	"devmem.de/srv/git/recipe-search/internal/rs"
+	"github.com/fatih/color"
+	"gopkg.in/yaml.v2"
 )
 
 // todo: set editor via config (done) OR via environment variable
@@ -62,7 +63,7 @@ func fileExists(f string) bool {
 }
 
 // findConfig looks for a config file
-func findConfig() (string, error){
+func findConfig() (string, error) {
 	// var path string
 	// var ok bool
 	var f string
@@ -78,7 +79,6 @@ func findConfig() (string, error){
 			return "", errors.New("$HOME not set")
 		}
 	}
-	fmt.Println(f)
 	if fileExists(f) {
 		return f, nil
 	}
