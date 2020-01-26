@@ -16,7 +16,8 @@ args:
   # args for text converter (paps)
   txtconvargs: "--font=Monospace 10"
   # the printer used by lpr
-  printer: "GraustufenNormalDuplex"
+#  printer: "GraustufenNormalDuplex"
+#  printer:
   # printer option for duplex printing
   printduplex: "-o Duplex=DuplexNoTumble"
   # printer option for color printing
