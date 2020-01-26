@@ -12,7 +12,6 @@ import (
 	"strconv"
 )
 
-// todo: func to find config file
 // todo: set editor via config (done) OR via environment variable
 // todo: message when search has no result: sorry and show new search dialog prompt, do not print helpline
 // todo: ensure that only txt files are concatenated
@@ -47,12 +46,43 @@ func fileClose(f *os.File) {
 	}
 }
 
-// configFile looks for a config file and returns it
-func configFile() string {
-	// $HOME/.recipe-search.yml or $HOME/.config/recipe-search/config.yml
-	// or internal defaults
-	f := "config.yml"
-	return f
+// lookup env vars
+func isEnv(s string) (string, bool) {
+	env, ok := os.LookupEnv(s)
+	return env, ok
+}
+
+// fileExist tests if a file exists
+func fileExists(f string) bool {
+	_, err := os.Stat(f)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+// findConfig looks for a config file
+func findConfig() (string, error){
+	// var path string
+	// var ok bool
+	var f string
+	path, ok := isEnv("XDG_CONFIG_HOME")
+	if ok {
+		f = fmt.Sprintf("%s/recipe-search/config.yml", path)
+	} else {
+		path, ok = isEnv("HOME")
+		if ok {
+			f = fmt.Sprintf("%s/.config/recipe-search/config.yml", path)
+		} else {
+			// 	$HOME not set
+			return "", errors.New("$HOME not set")
+		}
+	}
+	fmt.Println(f)
+	if fileExists(f) {
+		return f, nil
+	}
+	return "", errors.New("no config file")
 }
 
 // printer set in config: error when printing
@@ -86,16 +116,19 @@ func setPrinter() (string, error) {
 // It starts a loop for interacting with the user.
 func main() {
 	// C O N F I G U R A T I O N
-	cf := configFile()
-	var cfg Config
+	cf, err := findConfig()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(2)
+	}
 	f, err := os.Open(cf)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error opening file: %v\n", err)
 		os.Exit(1)
 	}
-
 	defer fileClose(f)
 
+	var cfg Config
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&cfg)
 
@@ -113,12 +146,8 @@ func main() {
 			cfg.Args.Printer = s
 		}
 	}
-	// todo: check if the printer set in config file is a valid printer
 
-	// debug
-	// fmt.Println("PRINTER:", cfg.Args.Printer)
-
-	// put all configs for printing into a map
+	// put all print configs into a map
 	prntcfg := map[string]string{
 		"prntcmd":       cfg.Programs.PrintCmd,
 		"converter":     cfg.Programs.TxtConverter,
@@ -128,7 +157,7 @@ func main() {
 		"prntduplex":    cfg.Args.PrintDuplex,
 		"prntcolor":     cfg.Args.ColorPrint,
 	}
-	// flag indicating if files are listed as URI or filename only
+	// flag indicating that search results are listed as URI or filename only
 	// false means: as filename (default)
 	Uri := cfg.Flags.Uri
 
