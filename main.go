@@ -112,6 +112,17 @@ func setPrinter() (string, error) {
 	return printer, nil
 }
 
+// setEditor looks for env var 'EDITOR'
+func setEditor() (string, error) {
+	editor, ok := os.LookupEnv("EDITOR")
+	if !ok {
+		// EDITOR not set
+		err := errors.New("environment variable EDITOR not set")
+		return "error", err
+	}
+	return editor, nil
+}
+
 // main is the text user interface of this program.
 // It starts a loop for interacting with the user.
 func main() {
@@ -147,6 +158,15 @@ func main() {
 		}
 	}
 
+	if cfg.Programs.Editor == "" {
+		editor, err := setEditor()
+		if err != nil {
+			cfg.Programs.Editor = ""
+		} else {
+			cfg.Programs.Editor = editor
+		}
+	}
+
 	// put all print configs into a map
 	prntcfg := map[string]string{
 		"prntcmd":       cfg.Programs.PrintCmd,
@@ -161,6 +181,8 @@ func main() {
 	// false means: as filename (default)
 	Uri := cfg.Flags.Uri
 
+
+	// user interface starting here
 	resultPathFile, resultFile := rs.Search(cfg.Programs.Searcher, cfg.Args.SearcherArgs)
 	rs.ViewResult(resultPathFile, resultFile, Uri)
 	helpLine := color.CyanString("h help | q quit | n new search | l long |" +
