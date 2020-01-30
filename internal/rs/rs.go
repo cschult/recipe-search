@@ -2,7 +2,6 @@ package rs
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"github.com/akutz/sortfold"
 	"github.com/fatih/color"
@@ -92,7 +91,7 @@ func ConcatFile(resultPathFile []string, resultFile []string, i int) error {
 	fmt.Printf("\npress ENTER to continue")
 	cont := bufio.NewScanner(os.Stdin)
 	cont.Scan()
-	return err
+	return nil
 }
 
 // EditFile opens external editor to edit a recipe
@@ -131,13 +130,15 @@ func EditFile(editor string, resultPathFile []string) error {
 	err = cmd.Start()
 	if err != nil {
 		// PrtErr("error starting editor:", err)
-		return errors.New("error starting editor")
+		// return errors.New("error starting editor")
+		return err
 	}
 
 	err = cmd.Wait()
 	if err != nil {
 		// PrtErr("error waiting for editor:", err)
-		return errors.New("error waiting for editor")
+		// return errors.New("error waiting for editor")
+		return err
 	}
 	return nil
 }
@@ -197,26 +198,31 @@ func Print(cfg map[string]string, resultPathFile []string) error {
 
 	err = first.Start()
 	if err != nil {
-		PrtErr("error starting paps:", err)
+		// PrtErr("error starting paps:", err)
+		return err
 	}
 
 	err = second.Start()
 	if err != nil {
-		PrtErr("error starting lpr:", err)
+		// PrtErr("error starting lpr:", err)
+		return err
 	}
 
 	err = first.Wait()
 	if err != nil {
-		PrtErr("error waiting for paps:", err)
+		// PrtErr("error waiting for paps:", err)
+		return err
 	}
 
 	err = writer.Close()
 	if err != nil {
-		PrtErr("error closing writer", err)
+		// PrtErr("error closing writer", err)
+		return err
 	}
 	err = second.Wait()
 	if err != nil {
-		PrtErr("error waiting for lpr:", err)
+		// PrtErr("error waiting for lpr:", err)
+		return err
 	}
 
 	fmt.Printf("printed file %s\n", file)
