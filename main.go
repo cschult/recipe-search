@@ -13,6 +13,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// todo: debug error handling of Print() and EditFile()
 // todo: set editor via config (done) OR via environment variable
 // todo: message when search has no result: sorry and show new search dialog prompt, do not print helpline
 // todo: ensure that only txt files are concatenated
@@ -47,9 +48,12 @@ func fileClose(f *os.File) {
 	}
 }
 
-// lookup env vars
+// check if env var is set and not empty
 func isEnv(s string) (string, bool) {
 	env, ok := os.LookupEnv(s)
+	if len(env) == 0 {
+		return env, false
+	}
 	return env, ok
 }
 
@@ -90,10 +94,10 @@ func findConfig() (string, error) {
 //   if PRINTER not set: disable printing
 //   if PRINTER is set, test if ok, else disable printing
 func setPrinter() (string, error) {
-	printer, ok := os.LookupEnv("PRINTER")
+	printer, ok := isEnv("PRINTER")
 	if !ok {
-		// $PRINTER is not set
-		err := errors.New("environment variable PRINTER not set")
+		// $PRINTER is not set or empty
+		err := errors.New("environment variable PRINTER not set or empty")
 		return "error", err
 	} else {
 		// check if $PRINTER is a valid printer
@@ -114,10 +118,10 @@ func setPrinter() (string, error) {
 
 // setEditor looks for env var 'EDITOR'
 func setEditor() (string, error) {
-	editor, ok := os.LookupEnv("EDITOR")
+	editor, ok := isEnv("EDITOR")
 	if !ok {
 		// EDITOR not set
-		err := errors.New("environment variable EDITOR not set")
+		err := errors.New("environment variable EDITOR not set or empty")
 		return "error", err
 	}
 	return editor, nil
